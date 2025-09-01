@@ -1,13 +1,25 @@
+# railway.toml
+
 [build]
-builder = "NIXPACKS"
+# Use Maven Wrapper
+command = "./mvnw -DskipTests clean package -Pproduction"
 
-[phases.build]
-cmds = ["mvn -DskipTests clean package -Pproduction"]
+[deploy]
+command = "java -jar target/*.jar"
 
-[phases.start]
-cmds = ["java -jar target/*.jar"]
-
-
-
-
-
+[env]
+# Replace the placeholders in Railway dashboard
+db_name = "journaldb"
+google_oauth2_client_id = "REPLACE_ME"
+google_oauth2_client_secret = "REPLACE_ME"
+kafka_consumer_group_id = "sentiment-group"
+kafka_server = "localhost:9092"
+mongo_uri = "mongodb+srv://USERNAME:PASSWORD@cluster.mongodb.net/?retryWrites=true&w=majority&appName=journalApp"
+redis_host = "redis-13456.crce182.ap-south-1-1.ec2.redns.redis-cloud.com"
+redis_password = "REPLACE_ME"
+redis_port = "13456"
+spring_mail_host = "smtp.gmail.com"
+spring_mail_username = "gourraj548@gmail.com"
+spring_mail_password = "REPLACE_ME"
+spring_mail_port = "587"
+weather_api_key = "REPLACE_ME"
