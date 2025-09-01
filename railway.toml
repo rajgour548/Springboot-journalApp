@@ -6,3 +6,8 @@ cmds = ["mvn -DskipTests clean package -Pproduction"]
 
 [phases.start]
 cmds = ["java -jar target/*.jar"]
+
+
+
+
+
