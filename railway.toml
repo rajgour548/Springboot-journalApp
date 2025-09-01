@@ -1,8 +1,0 @@
-[build]
-builder = "paketobuildpacks/builder:base"
-
-[phases.build]
-cmd = "mvn -DskipTests clean package -Pproduction"
-
-[start]
-cmd = "java -jar target/*.jar"
