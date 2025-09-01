@@ -1,6 +1,6 @@
 [build]
 # Use Java 17 instead of 21
-environment = { JAVA_VERSION = "8" }
+environment = { JAVA_VERSION = "17" }
 command = "mvn -B -DskipTests clean install"
 
 [deploy]
