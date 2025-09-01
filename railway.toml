@@ -1,7 +1,9 @@
 # railway.toml
 
 [build]
-command = "./mvnw -DskipTests clean package -Pproduction"
+command = "chmod +x mvnw && ./mvnw -B -DskipTests clean install -Pproduction"
+env = { JAVA_HOME = "/usr/local/railpack/java/21", PATH = "/usr/local/railpack/java/21/bin:$PATH" }
 
 [deploy]
-command = "java -jar target/*.jar"
+command = "java -Dserver.port=$PORT $JAVA_OPTS -jar target/*.jar"
+env = { JAVA_HOME = "/usr/local/railpack/java/21", PATH = "/usr/local/railpack/java/21/bin:$PATH" }
