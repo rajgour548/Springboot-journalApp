@@ -1,5 +1,7 @@
 [build]
-command = "mvn -B -DskipTests clean install -Pproduction"
+# Use Java 17 instead of 21
+environment = { JAVA_VERSION = "8" }
+command = "mvn -B -DskipTests clean install"
 
 [deploy]
 command = "java -Dserver.port=$PORT $JAVA_OPTS -jar target/*.jar"
