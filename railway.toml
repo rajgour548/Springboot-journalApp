@@ -1,9 +1,22 @@
-# railway.toml
+# railway.toml for Spring Boot Deployment
 
 [build]
-command = "chmod +x mvnw && ./mvnw -B -DskipTests clean install -Pproduction"
-env = { JAVA_HOME = "/usr/local/railpack/java/21", PATH = "/usr/local/railpack/java/21/bin:$PATH" }
+# Set JAVA_HOME correctly, add to PATH, make mvnw executable, then build with Maven
+command = """
+export JAVA_HOME=/usr/local/railpack/java/21
+export PATH=$JAVA_HOME/bin:$PATH
+chmod +x mvnw
+./mvnw -B -DskipTests clean install -Pproduction
+"""
 
 [deploy]
-command = "java -Dserver.port=$PORT $JAVA_OPTS -jar target/*.jar"
-env = { JAVA_HOME = "/usr/local/railpack/java/21", PATH = "/usr/local/railpack/java/21/bin:$PATH" }
+# Set JAVA_HOME and PATH again before running your Spring Boot jar
+command = """
+export JAVA_HOME=/usr/local/railpack/java/21
+export PATH=$JAVA_HOME/bin:$PATH
+java -Dserver.port=$PORT $JAVA_OPTS -jar target/*.jar
+"""
+
+[services]
+# Optional: If you want Railway to know your service type
+type = "web"
