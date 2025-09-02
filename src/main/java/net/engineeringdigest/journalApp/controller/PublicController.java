@@ -18,6 +18,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/public")
 @Slf4j
@@ -36,14 +39,22 @@ public class PublicController {
     private JwtUtils jwtUtils;
 
     @PostMapping("/signup")
-    public void signUP(@RequestBody net.engineeringdigest.journalApp.dto.UserDto user) {
+    public ResponseEntity<Map<String,String>> signUP(@RequestBody net.engineeringdigest.journalApp.dto.UserDto user) {
         User newUser = new User();
         newUser.setUserName(user.getUserName());
         newUser.setEmail(user.getEmail());
         newUser.setPassword(user.getPassword());
         newUser.setSentimentAnalysis(user.isSentimentAnalysis());
-
-        userService.saveNewUser(newUser);
+try {
+    userService.saveNewUser(newUser);
+    Map<String, String> response = new HashMap<>();
+    response.put("message", "Signup successful 🎉");
+    return ResponseEntity.ok(response);
+} catch (Exception e) {
+    Map<String, String> response = new HashMap<>();
+    response.put("error","user already exists");
+    return ResponseEntity.badRequest().body(response);
+}
     }
 
 

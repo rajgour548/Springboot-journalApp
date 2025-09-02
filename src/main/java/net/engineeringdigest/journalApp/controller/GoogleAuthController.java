@@ -82,7 +82,14 @@ public class GoogleAuthController {
                     userRepository.save(user);
                 }
                 String jwtToken = jwtUtils.generateToken(email);
-                return ResponseEntity.ok(Collections.singletonMap("token", jwtToken));
+                String htmlResponse = "<script>" +
+                        "window.opener.postMessage({ token: '" + jwtToken + "' }, '*');" +
+                        "window.close();" +
+                        "</script>";
+
+                HttpHeaders responseHeaders = new HttpHeaders();
+                responseHeaders.setContentType(MediaType.TEXT_HTML);
+                return new ResponseEntity<>(htmlResponse, responseHeaders, HttpStatus.OK);
             }
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         } catch (Exception e) {
