@@ -3,6 +3,7 @@ package net.engineeringdigest.journalApp.config;
 import net.engineeringdigest.journalApp.filter.JwtFilter;
 import net.engineeringdigest.journalApp.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,6 +31,9 @@ public class SpringSecurity extends WebSecurityConfigurerAdapter{
 
     @Autowired
     private JwtFilter jwtFilter;
+
+    @Value("${FRONTEND_URL}")
+    private String frontendUrl;
 
   @Override
   public void configure(HttpSecurity http) throws Exception{
@@ -68,7 +72,7 @@ public class SpringSecurity extends WebSecurityConfigurerAdapter{
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(Arrays.asList("http://localhost:5173")); // your React app
+        config.setAllowedOrigins(Arrays.asList(frontendUrl)); // your React app
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(Arrays.asList("*"));
         config.setAllowCredentials(true);
