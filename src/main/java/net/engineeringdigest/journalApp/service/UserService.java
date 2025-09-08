@@ -37,12 +37,7 @@ public class UserService {
             user.setRoles(Arrays.asList("USER"));
             userRepository.save(user);
         } catch (Exception e) {
-            log.info("error occured for {}",user.getUserName(),e);
-            log.error("hahhahh");
-            log.warn("hhshshhh");
-            log.debug("hssvgdgs");
-            log.trace("hjhd");
-
+            log.info("error occured for ",user.getUserName(),e);
             throw new RuntimeException();
         }
     }
@@ -65,4 +60,9 @@ public class UserService {
     public void  deleteByUserName(String username){
         userRepository.deleteByUserName(username);
     }
+
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email).orElse(null);
     }
+
+}

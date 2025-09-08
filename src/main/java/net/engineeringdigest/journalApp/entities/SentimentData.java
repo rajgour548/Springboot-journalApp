@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class SentimentData {
-
+    private String actualName;
     private String email;
     private String sentiment;
 }

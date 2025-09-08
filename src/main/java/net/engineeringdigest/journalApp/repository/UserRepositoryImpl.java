@@ -7,10 +7,13 @@ import org.springframework.data.mongodb.core.query.Query;
 import net.engineeringdigest.journalApp.entities.User;
 
 import java.util.List;
+import java.util.Optional;
 
 public class UserRepositoryImpl {
     @Autowired
     private MongoTemplate mongoTemplate;
+
+
 
     public List<User> getUserForSA() {
         Query query = new Query();

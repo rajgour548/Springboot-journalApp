@@ -18,6 +18,6 @@ public class SentimentConsumerService {
     }
 
     public void sendEmail(SentimentData sentimentData) {
-        emailService.sendEmail(sentimentData.getEmail(), "Sentiment for previous week", sentimentData.getSentiment());
+        emailService.sendEmail(sentimentData.getEmail(), "Dear "+sentimentData.getActualName()+",This notfication is from JournalApp", sentimentData.getSentiment());
     }
 }

@@ -1,3 +1,4 @@
+
 package net.engineeringdigest.journalApp.service;
 
 import net.engineeringdigest.journalApp.entities.JournalEntry;
@@ -33,8 +34,8 @@ public class JournalEntryService {
             userService.saveUser(user);
         }
         catch(Exception e){
-                System.out.println(e);
-                throw new RuntimeException("An error occured while saving Entry"+e);
+            System.out.println(e);
+            throw new RuntimeException("An error occured while saving Entry"+e);
         }
     }
     public void saveEntry(JournalEntry journalEntry) {
@@ -42,9 +43,9 @@ public class JournalEntryService {
         journalEntryRepository.save(journalEntry);
     }
     public List<JournalEntry> getAll (){
-            List<JournalEntry> journalEntry = journalEntryRepository.findAll();
-            return journalEntry;
-        }
+        List<JournalEntry> journalEntry = journalEntryRepository.findAll();
+        return journalEntry;
+    }
 
     public Optional<JournalEntry>  getById(ObjectId myId){
         return journalEntryRepository.findById(String.valueOf(myId));
@@ -52,17 +53,17 @@ public class JournalEntryService {
     @Transactional
     public void deleteById(ObjectId myId, String username){
         try{
-        User user= userService.findByUserName(username);
-        boolean check = user.getJournalEntries().removeIf(x -> x.getId().equals(myId));
-        if(check) {
-           userService.saveUser(user);
-           journalEntryRepository.deleteById(String.valueOf(myId));
+            User user= userService.findByUserName(username);
+            boolean check = user.getJournalEntries().removeIf(x -> x.getId().equals(myId));
+            if(check) {
+                userService.saveUser(user);
+                journalEntryRepository.deleteById(String.valueOf(myId));
 
-                  }
-           }
+            }
+        }
         catch(Exception e){
             System.out.println(e);
             throw new RuntimeException("An error occured while deleting Entry"+e);
-                          }
         }
     }
+}

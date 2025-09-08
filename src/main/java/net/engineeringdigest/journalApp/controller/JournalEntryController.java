@@ -1,3 +1,4 @@
+
 package net.engineeringdigest.journalApp.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -43,7 +44,7 @@ public class JournalEntryController {
     public ResponseEntity<JournalEntry> createEntryOfUser(@RequestBody JournalEntry myentry){
         try{
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-           String username = authentication.getName();
+            String username = authentication.getName();
             journalEntryService.saveEntry(myentry,username);
             return new ResponseEntity<>(myentry,HttpStatus.CREATED);
         }
@@ -57,16 +58,16 @@ public class JournalEntryController {
         ObjectId objectId = new ObjectId(myId);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
-       User user = userService.findByUserName(username);
-       List <JournalEntry> collect = user.getJournalEntries().stream().filter(x -> x.getId().equals(objectId)).collect(Collectors.toList());
-       if(!collect.isEmpty()){
-           Optional <JournalEntry > journalEntry = journalEntryService.getById(objectId);
-           if(journalEntry.isPresent()){
-               return new ResponseEntity<>(journalEntry.get(), HttpStatus.OK);
-           }
-       }
+        User user = userService.findByUserName(username);
+        List <JournalEntry> collect = user.getJournalEntries().stream().filter(x -> x.getId().equals(objectId)).collect(Collectors.toList());
+        if(!collect.isEmpty()){
+            Optional <JournalEntry > journalEntry = journalEntryService.getById(objectId);
+            if(journalEntry.isPresent()){
+                return new ResponseEntity<>(journalEntry.get(), HttpStatus.OK);
+            }
+        }
 
-       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @DeleteMapping("id/{myId}")
@@ -87,14 +88,15 @@ public class JournalEntryController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         User user = userService.findByUserName(username);
-        List <JournalEntry> collect = user.getJournalEntries().stream().filter(x -> x.getId().equals(myId)).collect(Collectors.toList());
+        List <JournalEntry> collect = user.getJournalEntries().stream().filter(x -> x.getId().equals(objectId)).collect(Collectors.toList());
         if(!collect.isEmpty()){
             Optional <JournalEntry > journalEntry = journalEntryService.getById(objectId);
-                JournalEntry old = journalEntry.get();
-                old.setTitle(newentry.getTitle() != null && !newentry.getTitle().equals("") ? newentry.getTitle():old.getTitle());
-                old.setContent(newentry.getContent() !=null && !newentry.getContent().equals("")?newentry.getContent():old.getContent());
-                journalEntryService.saveEntry(old);
-                return new ResponseEntity<>(old,HttpStatus.OK);
+            JournalEntry old = journalEntry.get();
+            old.setTitle(newentry.getTitle() != null && !newentry.getTitle().equals("") ? newentry.getTitle():old.getTitle());
+            old.setContent(newentry.getContent() !=null && !newentry.getContent().equals("")?newentry.getContent():old.getContent());
+            old.setSentiment(newentry.getSentiment() != null ? newentry.getSentiment() : old.getSentiment());
+            journalEntryService.saveEntry(old);
+            return new ResponseEntity<>(old,HttpStatus.OK);
 
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);

@@ -70,18 +70,22 @@ public class GoogleAuthController {
             if (userInfoResponse.getStatusCode() == HttpStatus.OK) {
                 Map<String, Object> userInfo = userInfoResponse.getBody();
                 String email = (String) userInfo.get("email");
+                String name = (String)userInfo.get("name");
+              //  String sanitizedName = (String)name.replaceAll("\\s+", "");
                 UserDetails userDetails = null;
                 try{
-                    userDetails = userDetailsService.loadUserByUsername(email);
+                    userDetails = userDetailsService.loadUserByUsername(name);
                 }catch (Exception e){
                     User user = new User();
                     user.setEmail(email);
-                    user.setUserName(email);
+                    user.setActualName(name);
+                    user.setUserName(name);
                     user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
                     user.setRoles(Arrays.asList("USER"));
+                    user.setSentimentAnalysis(true);
                     userRepository.save(user);
                 }
-                String jwtToken = jwtUtils.generateToken(email);
+                String jwtToken = jwtUtils.generateToken(name);
                 String htmlResponse = "<script>" +
                         "window.opener.postMessage({ token: '" + jwtToken + "' }, '*');" +
                         "window.close();" +

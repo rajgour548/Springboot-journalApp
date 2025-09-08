@@ -4,7 +4,13 @@ import net.engineeringdigest.journalApp.entities.JournalEntry;
 import net.engineeringdigest.journalApp.entities.User;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-public interface UserRepository extends MongoRepository<User, String> {
+import java.util.Optional;
+
+public interface UserRepository extends MongoRepository<User,String> {
     User findByUserName( String username);
     User deleteByUserName(String username);
+    Optional<User> findByEmail(String email);
+
+
+
 }

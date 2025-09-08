@@ -2,6 +2,7 @@ package net.engineeringdigest.journalApp.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import net.engineeringdigest.journalApp.api.response.WeatherResponse;
+import net.engineeringdigest.journalApp.dto.HomeResponseDto;
 import net.engineeringdigest.journalApp.entities.User;
 import net.engineeringdigest.journalApp.service.UserService;
 import net.engineeringdigest.journalApp.service.WeatherService;
@@ -13,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -31,7 +33,8 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         User userInDb = userService.findByUserName(username);
-            userInDb.setUserName(user.getUserName());
+            userInDb.setUserName(userInDb.getUserName());
+            userInDb.setActualName(user.getActualName());
             userInDb.setPassword(user.getPassword());
             userService.saveNewUser(userInDb);
 
@@ -44,23 +47,39 @@ public class UserController {
      userService.deleteByUserName(username);
     }
 
-    @GetMapping
-    public ResponseEntity<?> greeting(){
+    @GetMapping("/home")
+    public ResponseEntity<HomeResponseDto> greeting() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
 
-        WeatherResponse weatherResponse = weatherService.getWeather("Delhi");
-        String greetings="";
-        List<String> days = new ArrayList<String>();
+        User userInDb = userService.findByUserName(username);
 
-        if(weatherResponse != null) {
-           greetings = " Weather feels like " + weatherResponse.getCurrent().getFeelslike();
-           days = weatherResponse.getCurrent().getWeatherDescriptions();
-           for( String day : days){
-               return new ResponseEntity<>("hii," + username + greetings+", "+day, HttpStatus.OK);
-           }
+        // 🔹 Creating a static WeatherResponse because i reached monthly calls for weather Api, once its restart i will remove this and use actual Api
+        WeatherResponse weatherResponse = new WeatherResponse();
+        WeatherResponse.Current current = weatherResponse.new Current();
+        current.setFeelslike(28); // static feels like temperature
+        current.setTemperature(30); // static temperature
+        current.setWeatherDescriptions(Arrays.asList("Sunny with clear skies ☀️"));
+        weatherResponse.setCurrent(current);
+
+        // 🔹 Build the HomeResponseDto as usual
+        HomeResponseDto response = new HomeResponseDto();
+        response.setActualName(userInDb.getActualName());
+        response.setEmail(userInDb.getEmail());
+        response.setUserName(userInDb.getUserName());
+
+
+        if (weatherResponse != null && weatherResponse.getCurrent() != null) {
+            response.setFeelsLike(weatherResponse.getCurrent().getFeelslike());
+            response.setWeatherDescriptions(weatherResponse.getCurrent().getWeatherDescriptions());
+            response.setGreeting("The Temperature today feels like " + weatherResponse.getCurrent().getFeelslike() + "°C");
+        } else {
+            response.setGreeting("Hi " + username);
         }
-        return new ResponseEntity<>("hii," + username , HttpStatus.OK);
+
+        return ResponseEntity.ok(response);
     }
+
+
 
 }
