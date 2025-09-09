@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class SentimentConsumerService {
     @Autowired
-    private EmailService emailService;
+    private BrevoEmailService brevoEmailService ;
 
     @KafkaListener(topics = "weekly-sentiments", groupId = "sentiment-group")
     public void consume(SentimentData sentimentData) {
@@ -18,6 +18,6 @@ public class SentimentConsumerService {
     }
 
     public void sendEmail(SentimentData sentimentData) {
-        emailService.sendEmail(sentimentData.getEmail(), "Dear "+sentimentData.getActualName()+",This notfication is from JournalApp", sentimentData.getSentiment());
+        brevoEmailService.sendEmail(sentimentData.getEmail(), "Dear "+sentimentData.getActualName()+",This notfication is from JournalApp", sentimentData.getSentiment());
     }
 }

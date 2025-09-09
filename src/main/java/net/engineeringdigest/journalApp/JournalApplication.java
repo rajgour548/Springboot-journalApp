@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
-  //@EnableScheduling
+  @EnableScheduling
 public class JournalApplication {
 
     public static void main(String[] args) {

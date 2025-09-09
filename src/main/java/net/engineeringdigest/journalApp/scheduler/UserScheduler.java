@@ -6,6 +6,7 @@ import net.engineeringdigest.journalApp.entities.JournalEntry;
 import net.engineeringdigest.journalApp.entities.SentimentData;
 import net.engineeringdigest.journalApp.entities.User;
 import net.engineeringdigest.journalApp.repository.UserRepositoryImpl;
+import net.engineeringdigest.journalApp.service.BrevoEmailService;
 import net.engineeringdigest.journalApp.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -26,7 +27,7 @@ public class UserScheduler{
     private AppCache appCache;
 
     @Autowired
-    private EmailService emailService;
+    private BrevoEmailService brevoEmailService;
 
     @Autowired
     private UserRepositoryImpl userRepository;
@@ -116,7 +117,7 @@ public class UserScheduler{
                     kafkaTemplate.send("weekly-sentiments", sentimentData.getEmail(), sentimentData).get();
                 } catch (Exception e) {
                     // Fallback: send email if Kafka fails
-                    emailService.sendEmail(sentimentData.getEmail(), subject, sentimentData.getSentiment());
+                    brevoEmailService.sendEmail(sentimentData.getEmail(), subject, sentimentData.getSentiment());
                 }
             }
         }
