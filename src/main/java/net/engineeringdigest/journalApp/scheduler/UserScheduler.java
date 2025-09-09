@@ -37,7 +37,7 @@ public class UserScheduler{
 
 
 
-    @Scheduled(cron="0/30 * * * * ?")
+    @Scheduled(cron = "0 0 8 */7 * ?")
     public void fetchUsersAndSendSaMail(){
         List<User> users = userRepository.getUserForSA();
         
