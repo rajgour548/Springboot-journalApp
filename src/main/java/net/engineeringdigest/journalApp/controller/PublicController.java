@@ -99,7 +99,13 @@ try {
         if (userOpt==null) {
             return new ResponseEntity<>("Email not registered", HttpStatus.BAD_REQUEST);
         }
-        verificationService.generateAndSendCode(email);
+        try {
+            verificationService.generateAndSendCode(email);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>("Failed to send code: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
         return new ResponseEntity<>("Code sent", HttpStatus.OK);
     }
 
