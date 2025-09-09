@@ -50,6 +50,9 @@ public class GoogleAuthController {
     @Autowired
     private JwtUtils jwtUtils;
 
+    @Value("${REDIRECT_URI}")
+    private String redirectUri;
+
     @GetMapping("/callback")
     public ResponseEntity<?> handleGoogleCallback(@RequestParam String code) {
         try {
@@ -58,7 +61,7 @@ public class GoogleAuthController {
             params.add("code", code);
             params.add("client_id", clientId);
             params.add("client_secret", clientSecret);
-            params.add("redirect_uri", "http://localhost:8080/auth/google/callback");
+            params.add("redirect_uri", redirectUri);
             params.add("grant_type", "authorization_code");
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
