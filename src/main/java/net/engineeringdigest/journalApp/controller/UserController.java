@@ -20,7 +20,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/user")
-@Tag(name="User Apis",description = "Read Update and Delete user through this Api")
+@Tag(name="User Apis",description = "To get, update and delete user - for admin purpose")
 public class UserController {
     @Autowired
     private UserService userService;

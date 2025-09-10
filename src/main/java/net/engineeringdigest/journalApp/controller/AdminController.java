@@ -13,7 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/admin")
-@Tag(name="Admin Apis")
+@Tag(name="Admin Api's",description = "To create admin")
 public class AdminController {
 
     @Autowired

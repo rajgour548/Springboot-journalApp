@@ -2,6 +2,7 @@
 package net.engineeringdigest.journalApp.controller;
 
 ;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import net.engineeringdigest.journalApp.entities.User;
 import net.engineeringdigest.journalApp.repository.UserRepository;
@@ -27,6 +28,7 @@ import java.util.*;
 @RestController
 @RequestMapping("/auth/google")
 @Slf4j
+@Tag(name="Google Auth Api's",description = "To authorise user with google account and generatetoken")
 public class GoogleAuthController {
 
     @Value("${spring.security.oauth2.client.registration.google.client-id}")

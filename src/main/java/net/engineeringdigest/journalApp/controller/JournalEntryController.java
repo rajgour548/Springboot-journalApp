@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("journal")
-@Tag(name="Journal Entry Apis")
+@Tag(name="Journal Entry Apis",description = "TO add, delete, update, get journal entries")
 public class JournalEntryController {
 
     @Autowired

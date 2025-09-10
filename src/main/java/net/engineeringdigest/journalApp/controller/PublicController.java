@@ -31,7 +31,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/public")
 @Slf4j
-@Tag(name="Public Apis")
+@Tag(name="Public Apis",description = "Include signup,login,send-code,verify")
 public class PublicController {
     @Autowired
     private UserService userService;
