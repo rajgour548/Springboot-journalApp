@@ -1,64 +1,81 @@
+
 package net.engineeringdigest.journalApp.utils;
 
-import org.springframework.stereotype.Component;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.stereotype.Component;
+
 import javax.crypto.SecretKey;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtUtils {
 
-    private String SECRET_KEY = "TaK+HaV^uvCHEFsEVfypW#7g9^k*Z8$V";
+    private final SecretKey signingKey;
 
-    private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+    public JwtUtils(SecretKey jwtSigningKey) {
+        this.signingKey = jwtSigningKey;
     }
 
-    public String extractUsername(String token) {
-        Claims claims = extractAllClaims(token);
-        return claims.getSubject();
-    }
+    // Existing token generation for normal login
+    public String generateToken(Authentication authentication) {
 
-    public Date extractExpiration(String token) {
-        return extractAllClaims(token).getExpiration();
-    }
+        long now = System.currentTimeMillis();
 
-    private Claims extractAllClaims(String token) {
-        return Jwts.parser()
-                .verifyWith(getSigningKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
-    }
+        List<String> roles = authentication.getAuthorities()
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .filter(authority -> authority.startsWith("ROLE_"))
+                .map(authority -> authority.substring(5))
+                .distinct()
+                .collect(Collectors.toList());
 
-    private Boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
-    }
-
-    public String generateToken(String username) {
-        Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, username);
-    }
-
-    private String createToken(Map<String, Object> claims, String subject) {
         return Jwts.builder()
-                .claims(claims)
-                .subject(subject)
-                .header().empty().add("typ","JWT")
-                .and()
-                .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
-                .signWith(getSigningKey())
+                .subject(authentication.getName())
+                .claim("roles", roles)
+                .issuedAt(new Date(now))
+                .expiration(new Date(now + 1000L * 60 * 60))
+                .signWith(signingKey)
                 .compact();
     }
 
-    public Boolean validateToken(String token) {
-        return !isTokenExpired(token);
+    // New token generation exclusively for password reset
+    public String generatePasswordResetToken(String username) {
+
+        long now = System.currentTimeMillis();
+
+        return Jwts.builder()
+                .subject(username)
+                .claim("purpose", "password_reset")
+                .issuedAt(new Date(now))
+                .expiration(new Date(now + 1000L * 60 * 10))
+                .signWith(signingKey)
+                .compact();
     }
 
+    public String validatePasswordResetToken(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .verifyWith(signingKey)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
 
+            String purpose = claims.get("purpose", String.class);
+
+            if (!"password_reset".equals(purpose)) {
+                return null;
+            }
+
+            return claims.getSubject();
+
+        } catch (Exception e) {
+            // Invalid signature, expired token, malformed token, etc.
+            return null;
+        }
+    }
 }

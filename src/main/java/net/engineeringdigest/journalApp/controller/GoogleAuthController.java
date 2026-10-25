@@ -5,15 +5,19 @@ package net.engineeringdigest.journalApp.controller;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import net.engineeringdigest.journalApp.entities.User;
+import net.engineeringdigest.journalApp.exception.GoogleAuthenticationException;
 import net.engineeringdigest.journalApp.repository.UserRepository;
 import net.engineeringdigest.journalApp.service.UserDetailsServiceImpl;
+import net.engineeringdigest.journalApp.service.UserService;
 import net.engineeringdigest.journalApp.utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -50,6 +54,9 @@ public class GoogleAuthController {
     private UserRepository userRepository;
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     private JwtUtils jwtUtils;
 
     @Value("${REDIRECT_URI}")
@@ -57,7 +64,6 @@ public class GoogleAuthController {
 
     @GetMapping("/callback")
     public ResponseEntity<?> handleGoogleCallback(@RequestParam String code) {
-        try {
             String tokenEndpoint = "https://oauth2.googleapis.com/token";
             MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
             params.add("code", code);
@@ -76,21 +82,43 @@ public class GoogleAuthController {
                 Map<String, Object> userInfo = userInfoResponse.getBody();
                 String email = (String) userInfo.get("email");
                 String name = (String)userInfo.get("name");
-              //  String sanitizedName = (String)name.replaceAll("\\s+", "");
-                UserDetails userDetails = null;
-                try{
-                    userDetails = userDetailsService.loadUserByUsername(name);
-                }catch (Exception e){
-                    User user = new User();
+                //  String sanitizedName = (String)name.replaceAll("\\s+", "");
+                // Find the JournalApp account using the Google email.
+                User user = userService.findByEmail(email);
+
+                if (user == null) {
+                    // Create a new JournalApp user.
+                    user = new User();
                     user.setEmail(email);
                     user.setActualName(name);
-                    user.setUserName(name);
-                    user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
+
+                    // Generate a username independent of Google's display name.
+                    user.setUserName("google_" + UUID.randomUUID());
+
+                    user.setPassword(
+                            passwordEncoder.encode(UUID.randomUUID().toString())
+                    );
                     user.setRoles(Arrays.asList("USER"));
+                    user.setAuthProvider("GOOGLE");
                     user.setSentimentAnalysis(true);
+
                     userRepository.save(user);
                 }
-                String jwtToken = jwtUtils.generateToken(name);
+
+// Load Spring Security details using the username stored in our database.
+                UserDetails userDetails =
+                        userDetailsService.loadUserByUsername(user.getUserName());
+
+// Build the Authentication object for JWT generation.
+                Authentication authentication =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
+                        );
+
+// Generate the JournalApp JWT.
+                String jwtToken = jwtUtils.generateToken(authentication);
                 String htmlResponse = "<script>" +
                         "window.opener.postMessage({ token: '" + jwtToken + "' }, '*');" +
                         "window.close();" +
@@ -100,12 +128,9 @@ public class GoogleAuthController {
                 responseHeaders.setContentType(MediaType.TEXT_HTML);
                 return new ResponseEntity<>(htmlResponse, responseHeaders, HttpStatus.OK);
             }
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        } catch (Exception e) {
-            log.error("Exception occurred while handleGoogleCallback ", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-
+        throw new GoogleAuthenticationException(
+                "Google authentication failed. Please try again."
+        );
     }
 }
 

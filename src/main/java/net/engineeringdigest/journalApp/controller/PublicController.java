@@ -1,9 +1,11 @@
 package net.engineeringdigest.journalApp.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jdk.internal.dynalink.support.NameCodec;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import net.engineeringdigest.journalApp.dto.LoginRequestDto;
+import net.engineeringdigest.journalApp.dto.ResetPasswordRequest;
 import net.engineeringdigest.journalApp.dto.VerifyRequest;
 import net.engineeringdigest.journalApp.entities.User;
 import net.engineeringdigest.journalApp.service.UserDetailsServiceImpl;
@@ -15,7 +17,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,7 +35,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/public")
 @Slf4j
-@Tag(name="Public Apis",description = "Include signup,login,send-code,verify")
+@Tag(name="Public Apis",description = "Include signup,login,send-code,verify,forgot-username,reset-password")
 public class PublicController {
     @Autowired
     private UserService userService;
@@ -48,6 +52,9 @@ public class PublicController {
     @Autowired
     private VerificationService verificationService;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
 
 
     @PostMapping("/signup")
@@ -58,38 +65,33 @@ public class PublicController {
         newUser.setEmail(user.getEmail());
         newUser.setPassword(user.getPassword());
         newUser.setSentimentAnalysis(user.isSentimentAnalysis());
-try {
-    userService.saveNewUser(newUser);
-    return new ResponseEntity<>(HttpStatus.OK);
-} catch (Exception e) {
-    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-}
+        userService.saveNewUser(newUser);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequestDto loginInfo) {
-        try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            loginInfo.getUserName(),
-                            loginInfo.getPassword()
-                    )
-            );
+    public ResponseEntity<?> login(
+            @RequestBody LoginRequestDto loginInfo) {
 
-            User user = userService.findByUserName(loginInfo.getUserName());
+        Authentication authentication =
+                authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(
+                                loginInfo.getUserName(),
+                                loginInfo.getPassword()
+                        )
+                );
 
-            // Generate JWT directly
-            String jwt = jwtUtils.generateToken(user.getUserName());
+        User user = userService.findByUserName(
+                loginInfo.getUserName());
 
-            Map<String, String> response = new HashMap<>();
-            response.put("jwt", jwt);
-            response.put("email", user.getEmail());
-            return new ResponseEntity<>(response, HttpStatus.OK);
+        String jwt = jwtUtils.generateToken(authentication);
 
-        } catch (Exception e) {
-            return new ResponseEntity<>("Incorrect username or password", HttpStatus.BAD_REQUEST);
-        }
+        Map<String, String> response = new HashMap<>();
+        response.put("jwt", jwt);
+        response.put("email", user.getEmail());
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/send-code")
@@ -111,14 +113,78 @@ try {
 
 
     @PostMapping("/verify")
-    public ResponseEntity<?> verifyForgotPasswordCode(@RequestBody VerifyRequest request) {
-        boolean valid = verificationService.verifyCode(request.getEmail(), request.getCode());
+    public ResponseEntity<?> verifyForgotPasswordCode(
+            @RequestBody VerifyRequest request) {
+
+        boolean valid = verificationService.verifyCode(
+                request.getEmail(), request.getCode());
+
         if (!valid) {
-            return new ResponseEntity<>("Invalid or expired code", HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest()
+                    .body("Invalid or expired code");
         }
+
         User user = userService.findByEmail(request.getEmail());
-        String jwt = jwtUtils.generateToken(user.getUserName()); // generate JWT after verification
-        return new ResponseEntity<>(jwt, HttpStatus.OK);
+
+        if (user == null) {
+            return ResponseEntity.badRequest()
+                    .body("Invalid or expired code");
+        }
+
+        String resetToken =
+                jwtUtils.generatePasswordResetToken(user.getUserName());
+
+        return ResponseEntity.ok(
+                java.util.Collections.singletonMap("resetToken", resetToken));
+    }
+
+    @PostMapping("/auth/reset-password")
+    public ResponseEntity<?> resetPassword(
+            @RequestBody ResetPasswordRequest request) {
+
+        String username = jwtUtils.validatePasswordResetToken(request.getResetToken());
+
+        if (username == null) {
+            return ResponseEntity.badRequest()
+                    .body("Invalid or expired password reset token");
+        }
+
+        if (request.getNewPassword() == null
+                || request.getNewPassword().length() < 8) {
+            return ResponseEntity.badRequest()
+                    .body("Password must contain at least 8 characters");
+        }
+
+        User user = userService.findByUserName(username);
+
+        if (user == null) {
+            return ResponseEntity.badRequest()
+                    .body("Invalid password reset request");
+        }
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userService.saveUser(user);
+
+        return ResponseEntity.ok("Password reset successful");
+    }
+
+    @PostMapping("/forgot-username")
+    public ResponseEntity<Map<String, String>> forgotUsername(
+            @RequestBody Map<String, String> request) {
+
+        String email = request.get("email");
+
+        if (email == null || email.trim().isEmpty()) {
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Email is required.");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        String message = userService.recoverUsername(email.trim());
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", message);
+
+        return ResponseEntity.ok(response);
     }
 
 

@@ -22,12 +22,9 @@ public class AdminController {
     private AppCache appCache;
 
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers(){
-    List<User> user = userService.getAll();
-    if(user.isEmpty()) {
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-        return new ResponseEntity<>(user, HttpStatus.OK);
+    public ResponseEntity<List<User>> getAllUsers() {
+        List<User> users = userService.getAll();
+        return ResponseEntity.ok(users);
     }
 
     @PostMapping("/create-admin")

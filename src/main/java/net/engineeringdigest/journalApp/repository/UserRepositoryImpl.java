@@ -13,8 +13,6 @@ public class UserRepositoryImpl {
     @Autowired
     private MongoTemplate mongoTemplate;
 
-
-
     public List<User> getUserForSA() {
         Query query = new Query();
         query.addCriteria(Criteria.where("email")
@@ -23,6 +21,4 @@ public class UserRepositoryImpl {
         List<User> users = mongoTemplate.find(query, User.class);
         return users;
     }
-
-
 }

@@ -35,4 +35,5 @@ public class JournalEntry {
     private String content;
     private LocalDateTime date;
     private Sentiment sentiment;
+    private List<String> emotions;
 }

@@ -12,7 +12,6 @@ import java.util.List;
 public class HomeResponseDto {
         private String actualName;
         private String email;
-        private String userName;
         private String password;
         private String greeting;
         private List<String> weatherDescriptions;
