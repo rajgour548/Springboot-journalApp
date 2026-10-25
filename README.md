@@ -87,8 +87,6 @@ git clone https://github.com/rajgour548/Springboot-journalApp.git
 cd <your-repository>
 ```
 
-Replace the placeholder with your actual GitHub repository URL.
-
 ### 2️⃣ Configure Environment Variables
 
 Configure the variables referenced in `src/main/resources/application.properties`, including:
