@@ -18,4 +18,4 @@ COPY --from=build /app/target/*.jar app.jar
 
 EXPOSE 10000
 
-ENTRYPOINT ["sh", "-c", "java -Dserver.port=${PORT:-10000} -jar app.jar"]
+ENTRYPOINT ["sh", "-c", "java -XX:+UseSerialGC -Xss512k -Xms64m -Xmx220m -XX:MaxMetaspaceSize=96m -Dserver.port=${PORT:-10000} -jar app.jar"]
