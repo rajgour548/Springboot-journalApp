@@ -65,8 +65,8 @@ Spring Boot Backend
 ```
 
 ## 🌐 Live Links
-
-- **Backend** ➜ [JournalApp on blitz.cloud](https://springboot-journalapp.journal-app.blitz.cloud/)
+- **Frontend** ➜ [on vercel](https://your-frontend.vercel.app)
+- **Backend** ➜ [on blitz.cloud](https://springboot-journalapp.journal-app.blitz.cloud/)
 - **Swagger UI** ➜ [Explore API Documentation](https://springboot-journalapp-production.up.railway.app/swagger-ui/index.html)
 
 ## 🚀 How to Run Locally
