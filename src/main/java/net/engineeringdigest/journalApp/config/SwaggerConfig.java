@@ -34,7 +34,7 @@ public class SwaggerConfig {
                         .bearerFormat("JWT")))
                 .servers(Arrays.asList(
                         new Server().url("http://localhost:8080/swagger-ui/index.html").description("Local Server"),
-                        new Server().url("https://springboot-journalapp-production.up.railway.app/swagger-ui/index.html").description("Production Server")))
+                        new Server().url("https://springboot-journalapp.journal-app.blitz.cloud/swagger-ui/index.html").description("Production Server")))
                 .info(new Info()
                         .title("Journal API")
                         .version("1.0.0")
