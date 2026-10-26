@@ -118,7 +118,7 @@ The application runs on port `8080` by default, unless configured otherwise.
 
 After starting the backend, visit:
 
-[http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
+**Swagger UI** ➜ [API,s Documentation]([http://localhost:8080/swagger-ui/index.html](https://springboot-journalapp.journal-app.blitz.cloud/swagger-ui/index.html))
 
 Use Swagger UI to explore the available REST endpoints and inspect their request and response formats.
 
