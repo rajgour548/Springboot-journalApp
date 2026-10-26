@@ -65,7 +65,7 @@ Spring Boot Backend
 ```
 
 ## 🌐 Live Links
-- **Frontend** ➜ [on vercel](https://your-frontend.vercel.app)
+- **Frontend** ➜ [on vercel](https://spring-boot-frontend-journal-app.vercel.app/)
 - **Backend** ➜ [on blitz.cloud](https://springboot-journalapp.journal-app.blitz.cloud/)
 - **Swagger UI** ➜ [Explore API Documentation](https://springboot-journalapp-production.up.railway.app/swagger-ui/index.html)
 
