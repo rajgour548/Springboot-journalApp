@@ -45,6 +45,7 @@ public class UserScheduler {
     @Autowired
     private KafkaTemplate<String, SentimentData> kafkaTemplate;
 
+    //this is for testing it will run every minute -> @Scheduled(cron = "0 * * * * *")
     @Scheduled(cron = "0 0 9 ? * MON")
     public void fetchUsersAndSendSaMail() {
 
